@@ -1,0 +1,19 @@
+{
+	"name": "markguinn/silverstripe-livepub",
+	"description": "Adds blocks of raw php to staticpublisher for limited 'live' elements (cookies, sessions, etc).",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "static publisher", "live", "holes"],
+	"license": "MIT",
+	"authors": [{
+		"name": "Mark Guinn",
+		"email": "mark@adaircreative.com",
+		"homepage": "http://github.com/markguinn"
+	}],
+	"extra": {
+		"installer-name": "livepub"
+	},
+	"require": {
+		"silverstripe/framework": "~3.1",
+		"silverstripe/staticpublisher": "*"
+	}
+}
