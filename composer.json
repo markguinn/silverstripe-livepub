@@ -13,7 +13,6 @@
 		"installer-name": "livepub"
 	},
 	"require": {
-		"silverstripe/framework": "~3.1",
-		"silverstripe/staticpublisher": "*"
+		"silverstripe/framework": "~3.1"
 	}
 }
