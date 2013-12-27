@@ -54,7 +54,7 @@ class LiveSecurityToken extends SecurityToken
 				function new_security_token() {
 					require_once("'.BASE_PATH.'/framework/security/RandomGenerator.php");
 					$generator = new RandomGenerator();
-					return $generator->randomToken("sha1");
+					return $_SESSION["'.$sessionKey.'"] = $generator->randomToken("sha1");
 				}
 				$security_token = isset($_SESSION["'.$sessionKey.'"]) ? $_SESSION["'.$sessionKey.'"] : new_security_token();
 			', 'LiveSecurityToken');
