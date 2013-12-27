@@ -15,10 +15,10 @@ Requirements
 
 Features
 --------
+- Allows CSRF tokens to remain enabled with static published sites
 - Insert blocks of live php into published pages (must use php publishing method)
 - With careful use, allows things like a "logged in as" area or sections based
   on session or cookie information, without loading any of Silverstripe.
-
 
 Installation
 ------------
@@ -31,8 +31,10 @@ Installation
 
 TODO
 ----
-- Should be pretty easy to re-enable CSRF on forms automatically with this
 - Docs
+- This could be architected better by removing static LivePubHelper and using
+  a singleton pattern with subclasses for "publishing" and "not publishing"
+
 
 Developer(s)
 ------------

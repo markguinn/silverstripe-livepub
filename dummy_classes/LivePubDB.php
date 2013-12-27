@@ -1,6 +1,7 @@
 <?php
 // emulate the silverstripe DB::query() function
-				
+
+/** @noinspection PhpUndefinedClassInspection */
 class DB {
 	static $conn;
 	

@@ -130,6 +130,19 @@ class LivePubHelper {
 
 
 	/**
+	 * @param string $code
+	 * @param string $id [optional] - if present, this prevents the same code from being added twice
+	 */
+	static function add_init_code($code, $id = null) {
+		if ($id) {
+			self::$init_code[$id] = $code;
+		} else {
+			self::$init_code[] = $code;
+		}
+	}
+
+
+	/**
 	 * @return string
 	 */
 	static function get_init_code_and_clear() {
@@ -198,7 +211,7 @@ class LivePubHelper {
 
 		// set up default template paths if needed
 		if (count(self::$template_path) == 0) {
-			self::$template_path[] = BASE_PATH . '/' . THEMES_DIR . '/' . SSViewer::current_theme() . '/templates/php';
+			self::$template_path[] = BASE_PATH . '/' . THEMES_DIR . '/' . SSViewer::config()->current_theme . '/templates/php';
 			self::$template_path[] = BASE_PATH . '/' . $project . '/templates/php';
 			self::$template_path[] = BASE_PATH . '/' . SSTOOLS_BASE . '/templates/php';
 		}
@@ -289,7 +302,7 @@ class LivePubHelper {
 	 * will include and initialize the DB::query stub
 	 * and connect to the main silverstripe database.
 	 * This allows limited use of DB::query() in both a live
-	 * and published context.	 
+	 * and published context.
 	 */
 	static function require_silverstripe_db() {
 		global $databaseConfig;

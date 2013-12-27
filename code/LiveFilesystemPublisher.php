@@ -15,15 +15,18 @@ class LiveFilesystemPublisher extends FilesystemPublisher
 	 * @param string $content
 	 * @param string $age
 	 * @param string $lastModified
+	 * @param string $contentType
 	 *
 	 * @return string
 	 */
-	protected function generatePHPCacheFile($content, $age, $lastModified) {
+	protected function generatePHPCacheFile($content, $age, $lastModified, $contentType) {
 		$template = file_get_contents(dirname(__FILE__) . '/CachedPHPPage.tmpl');
 
 		return str_replace(
-			array('**MAX_AGE**', '**LAST_MODIFIED**', '**CONTENT**'),
-			array((int)$age, $lastModified, LivePubHelper::get_init_code_and_clear() . $content),
+			array('**MAX_AGE**', '**LAST_MODIFIED**', '**CONTENT**', '**CONTENT_TYPE**',
+				LiveSecurityToken::get_token_placeholder()),
+			array((int)$age, $lastModified, LivePubHelper::get_init_code_and_clear() . $content, $contentType,
+				LiveSecurityToken::get_token_published_code()),
 			$template
 		);
 	}
