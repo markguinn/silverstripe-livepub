@@ -211,9 +211,8 @@ class LivePubHelper {
 
 		// set up default template paths if needed
 		if (count(self::$template_path) == 0) {
-			self::$template_path[] = BASE_PATH . '/' . THEMES_DIR . '/' . SSViewer::config()->current_theme . '/templates/php';
+			self::$template_path[] = BASE_PATH . '/' . SSViewer::get_theme_folder() . '/templates/php';
 			self::$template_path[] = BASE_PATH . '/' . $project . '/templates/php';
-			self::$template_path[] = BASE_PATH . '/' . SSTOOLS_BASE . '/templates/php';
 		}
 		
 		// check all the possible paths we've accumulated		
@@ -315,7 +314,13 @@ class LivePubHelper {
 			';
 		}
 	}
-	
-	
+
+
+	/**
+	 * Ensures that the session will be available on the published page.
+	 */
+	static function require_session() {
+		self::add_init_code('if (!session_id()) session_start();', 'require_session');
+	}
 }
 

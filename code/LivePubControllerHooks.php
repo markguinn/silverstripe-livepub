@@ -21,7 +21,7 @@ class LivePubControllerHooks extends Extension {
 	 * returns a viewable wrapper around the session
 	 */
 	function WrappedSession(){
-		LivePubHelper::$init_code[] = 'if (!session_id()) session_start();';
+		LivePubHelper::require_session();
 		$obj = LivePubHelper::wrap($_SESSION);
 		$obj->setVar('_SESSION');
 		return $obj;
