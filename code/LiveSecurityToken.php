@@ -3,7 +3,7 @@
  * Drop-in replacement for SecurityToken class that enables CSRF tokens to
  * remain active even when publishing.
  *
- * This is automatically turned on
+ * This is currently NOT USED.
  *
  *
  * @author Mark Guinn <mark@adaircreative.com>
@@ -31,7 +31,7 @@ class LiveSecurityToken extends SecurityToken
 	 */
 	public static function inst() {
 		if (Config::inst()->get('LiveSecurityToken', 'disabled')) return null;
-		if (!self::$inst) self::$inst = new LiveSecurityToken();
+		if (!self::$inst || !(self::$inst instanceof LiveSecurityToken)) self::$inst = new LiveSecurityToken();
 		return self::$inst;
 	}
 

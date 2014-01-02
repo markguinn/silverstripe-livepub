@@ -2,37 +2,14 @@
 /**
  * Helper class to facilitate dynamic content inside staticpublisher produced php files.
  *
- * TO INSTALL:
- *  1. Follow basic staticpublisher instructions at http://doc.silverstripe.org/staticpublisher
- *      - NOTE: you have to use 'php' not 'html' caching
- *      - Also, note that it has only been tested with filesystempublisher
- *  2. Comment out or remove cache management stuff in cms/code/staticpublisher/CachedPHPPage.tmpl (only **CONTENT** is required)
- *  3. In cms/code/staticpublisher/FilesystemPublisher.php, publishPages function:
- *		LivePubHelper::init_pub();
- *		foreach($urls as $url => $path) {
- *			LivePubHelper::clear_init_code();
- *			...
- *		}
- *		LivePubHelper::stop_pub();
- *     In the generatePHPCacheFile function:
- *		return str_replace(
- *				array('**MAX_AGE**', '**LAST_MODIFIED**', '**CONTENT**'),
- * //				array((int)$age, $lastModified, $content),
- *				array((int)$age, $lastModified, LivePubHelper::get_init_code() . $content),
- *				$template);
- *  4. Wrap anything that you don't want cached (is_ajax, session, etc)
- *  5. If you want the default template hooks, add this to mysite/_config.php
- *      Object::add_extension("Page_Controller", "LivePubHelper_ControllerHooks");
- *
  * @author Mark Guinn <mark@adaircreative.com>
  * @date 8.5.10
  */
-class LivePubHelper {
-
+class LivePubHelper extends Object
+{
 	protected static $is_publishing = false;
 
 	protected static $silverstripe_db_included = false;
-
 
 
 	/**
@@ -61,6 +38,8 @@ class LivePubHelper {
 	 * @var $template_path array - where to look for php templates. initially contains /templates/php in project and theme
 	 */
 	public static $template_path = array();
+
+
 
 	/**
 	 * this is only to be called when static publishing is starting
