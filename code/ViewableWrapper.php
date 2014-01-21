@@ -149,7 +149,7 @@ class ViewableWrapper extends ViewableData
 			if (ArrayLib::is_associative($obj)){
 				return new ViewableWrapper($obj);
 			} else {				
-				$set = new DataObjectSet();
+				$set = new ArrayList();
 		
 				foreach ($obj as $i => $item) {
 					$wrap = $this->wrapObject($item);
