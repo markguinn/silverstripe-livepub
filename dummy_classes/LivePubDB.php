@@ -15,6 +15,7 @@ class DB {
 	static function init(){
 		global $databaseConfig;
 		self::$conn = new mysqli($databaseConfig['server'], $databaseConfig['username'], $databaseConfig['password'], $databaseConfig['database']);
+		self::$conn->query("set sql_mode='ansi'");
 	}
 
 
@@ -27,7 +28,7 @@ class DB {
 		$handle = self::$conn->query($sql);
 
 		if (!$handle && $errorLevel) {
-			die("SQL Error.");
+			die("SQL Error: " . self::$conn->error);
 		}
 
 		return new LivePubQuery($handle);
