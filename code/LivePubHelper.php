@@ -288,7 +288,7 @@ class LivePubHelper extends Object
 			self::$silverstripe_db_included = true;
 			self::$init_code[] = '
 				$databaseConfig = '.var_export($databaseConfig, true).';
-				require_once "'.dirname(__FILE__).'/classes/LivePubDB.php";
+				require_once "'.dirname(dirname(__FILE__)).'/dummy_classes/LivePubDB.php";
 				DB::init();
 			';
 		}
