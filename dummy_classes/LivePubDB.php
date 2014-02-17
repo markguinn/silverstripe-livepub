@@ -6,6 +6,8 @@ class DB {
 	/** @var mysqli */
 	static $conn;
 
+	/** @var DB */
+	private static $instance;
 
 	/**
 	 * Creates the connection
@@ -31,6 +33,23 @@ class DB {
 		return new LivePubQuery($handle);
 	}
 
+
+	/**
+	 * @return DB
+	 */
+	static function getConn() {
+		if (!isset(self::$instance)) self::$instance = new self;
+		return self::$instance;
+	}
+
+
+	/**
+	 * @param $str
+	 * @return string
+	 */
+	function addSlashes($str) {
+		return self::$conn->real_escape_string($str);
+	}
 }
 
 
