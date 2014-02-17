@@ -3,57 +3,83 @@
 
 /** @noinspection PhpUndefinedClassInspection */
 class DB {
+	/** @var mysqli */
 	static $conn;
-	
+
+
+	/**
+	 * Creates the connection
+	 */
 	static function init(){
 		global $databaseConfig;
-		self::$conn = mysql_connect($databaseConfig["server"], $databaseConfig["username"], $databaseConfig["password"]);
-		mysql_select_db($databaseConfig["database"], self::$conn);
+		self::$conn = new mysqli($databaseConfig['server'], $databaseConfig['username'], $databaseConfig['password'], $databaseConfig['database']);
 	}
-	
+
+
+	/**
+	 * @param string $sql
+	 * @param int $errorLevel
+	 * @return LivePubQuery
+	 */
 	static function query($sql, $errorLevel = E_USER_ERROR){
-		$handle = mysql_query($sql, self::$conn);
+		$handle = self::$conn->query($sql);
+
 		if (!$handle && $errorLevel) {
-			die("SQL Error: " . mysql_error(self::$conn));
+			die("SQL Error.");
 		}
+
 		return new LivePubQuery($handle);
 	}
 
 }
 
+
 class LivePubQuery {
+	/** @var  mysqli_result */
 	private $handle;
 
+
+	/**
+	 * @param $handle
+	 */
 	public function __construct($handle) {
 		$this->handle = $handle;
 	}
-	
-	public function __destroy() {
-		mysql_free_result($this->handle);
+
+
+	public function __destruct() {
+		if(is_object($this->handle)) {
+			$this->handle->free();
+		}
 	}
-	
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function seek($row) {
-		return mysql_data_seek($this->handle, $row);
+		if(is_object($this->handle)) {
+			return $this->handle->data_seek($row);
+		}
 	}
-	
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function numRecords() {
-		return mysql_num_rows($this->handle);
+		if(is_object($this->handle)) {
+			return $this->handle->num_rows;
+		}
 	}
-	
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function nextRecord() {
-		// Coalesce rather than replace common fields.
-		if($data = mysql_fetch_row($this->handle)) {
-			foreach($data as $columnIdx => $value) {
-				$columnName = mysql_field_name($this->handle, $columnIdx);
-				// $value || !$ouput[$columnName] means that the *last* occurring value is shown
-				// !$ouput[$columnName] means that the *first* occurring value is shown
-				if(isset($value) || !isset($output[$columnName])) {
-					$output[$columnName] = $value;
-				}
-			}
-			return $output;
+		if(is_object($this->handle) && ($data = $this->handle->fetch_assoc())) {
+			return $data;
 		} else {
 			return false;
 		}
 	}
+
 }
