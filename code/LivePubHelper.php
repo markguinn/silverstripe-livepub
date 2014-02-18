@@ -51,7 +51,7 @@ class LivePubHelper extends Object
 
 		// if we've set up a global static configuration, add that in
 		$file = BASE_PATH . '/' . $project . '/_config_static.php';
-		if (file_exists($file)) {
+		if (file_exists($file) && strpos(self::$base_init_code, $file) === false) {
 			self::$base_init_code .= "\n<?php include_once('$file') ?>\n";
 		}
 	}
