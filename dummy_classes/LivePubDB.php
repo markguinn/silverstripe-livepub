@@ -9,11 +9,22 @@ class DB {
 	/** @var DB */
 	private static $instance;
 
+	
 	/**
 	 * Creates the connection
 	 */
 	static function init(){
 		global $databaseConfig;
+
+		if (!isset($databaseConfig)) {
+			$databaseConfig = array (
+				'server'    => SS_DATABASE_SERVER,
+				'username'  => SS_DATABASE_USERNAME,
+				'password'  => SS_DATABASE_PASSWORD,
+				'database'  => SS_DATABASE_NAME,
+			);
+		}
+
 		self::$conn = new mysqli($databaseConfig['server'], $databaseConfig['username'], $databaseConfig['password'], $databaseConfig['database']);
 		self::$conn->query("set sql_mode='ansi'");
 	}
