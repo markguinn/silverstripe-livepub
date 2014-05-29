@@ -37,7 +37,7 @@ class LivePubHelper extends Object
 	/**
 	 * @var $template_path array - where to look for php templates. initially contains /templates/php in project and theme
 	 */
-	public static $template_path = array();
+	protected static $template_path = array();
 
 
 
@@ -186,12 +186,9 @@ class LivePubHelper extends Object
 	 * @return string
 	 */
 	static function include_php($filename) {
-		global $project;
-
 		// set up default template paths if needed
 		if (count(self::$template_path) == 0) {
-			self::$template_path[] = BASE_PATH . '/' . SSViewer::get_theme_folder() . '/templates/php';
-			self::$template_path[] = BASE_PATH . '/' . $project . '/templates/php';
+			self::init_template_paths();
 		}
 		
 		// check all the possible paths we've accumulated		
@@ -221,6 +218,36 @@ class LivePubHelper extends Object
 			//return '<!-- php template -->' . $html . '<!-- end php template -->';
 			return $html;
 		}
+	}
+
+
+	/**
+	 * Sets up the default template paths
+	 */
+	protected static function init_template_paths() {
+		global $project;
+		self::$template_path = array();
+		self::$template_path[] = BASE_PATH . '/' . SSViewer::get_theme_folder() . '/templates/php';
+		self::$template_path[] = BASE_PATH . '/' . $project . '/templates/php';
+	}
+
+
+	/**
+	 * @param array $paths
+	 */
+	static function set_template_paths(array $paths) {
+		self::$template_path = $paths;
+	}
+
+
+	/**
+	 * Path should be relative to BASE_PATH
+	 * @param string $path
+	 */
+	static function add_template_path($path) {
+		if (!isset(self::$template_path) || empty(self::$template_path)) self::init_template_paths();
+		if ($path[0] != '/') $path = BASE_PATH . '/' . $path;
+		self::$template_path[] = rtrim($path, '/');
 	}
 	
 	

@@ -6,7 +6,25 @@
  * @date 04.23.2013
  * @package livepub
  */
-class LivePubControllerHooks extends Extension {
+class LivePubControllerHooks extends Extension
+{
+	/**
+	 * The default base_tag implementation returns the full http://
+	 * url which causes issues with static publishing + https.
+	 * @return string
+	 */
+	public function BaseTag() {
+		return LivePubHelper::eval_php('
+			$url = ((!isset($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] == "off")
+							&& !(isset($_SERVER["HTTP_X_FORWARDED_PROTOCOL"]) && strtolower($_SERVER["HTTP_X_FORWARDED_PROTOCOL"]) == "https"))
+				? "http://"
+				: "https://";
+			$url .= $_SERVER["HTTP_HOST"] . "/";
+			if (defined("BASE_URL") && BASE_URL) $url .= BASE_URL;
+			if (substr($url, -1) != "/") $url .= "/";
+			return "<base href=\"" . $url . "\"><!--[if lte IE 6]></base><![endif]-->";
+		');
+	}
 
 
 	/**
