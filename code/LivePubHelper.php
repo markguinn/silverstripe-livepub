@@ -157,14 +157,15 @@ class LivePubHelper extends Object
 			return eval($code);
 		}
 	}
-	
-	
+
+
 	/**
 	 * evaluates the given php code unless we're currently publishing, in which case it
 	 * adds the php code to the initialization code.
 	 * NOTE: this will not return or output the result
 	 *
 	 * @param string $code
+	 * @param bool   $alwaysExec
 	 * @return none
 	 */
 	static function exec_php($code, $alwaysExec=false) {
@@ -175,7 +176,7 @@ class LivePubHelper extends Object
 			eval($code);
 		}
 	}
-	
+
 
 	/**
 	 * loads a php template from the templates/php folder (allowing for themes)
@@ -183,6 +184,7 @@ class LivePubHelper extends Object
 	 * depending on whether we're staticpublishing or not
 	 *
 	 * @param string $filename
+	 * @throws Exception
 	 * @return string
 	 */
 	static function include_php($filename) {
@@ -249,16 +251,16 @@ class LivePubHelper extends Object
 		if ($path[0] != '/') $path = BASE_PATH . '/' . $path;
 		self::$template_path[] = rtrim($path, '/');
 	}
-	
-	
+
+
 	/**
 	 * factory method to create a new wrapper object. if we're
-	 * static publishing and an appropriate helper class is 
+	 * static publishing and an appropriate helper class is
 	 * available it will use that instead. A helper class shouldn't
 	 * be needed very often but would be used if you wanted a totally
 	 * different class for publishing vs normal mode
 	 *
-	 * @param object|array $srcdata
+	 * @param object|array $object
 	 * @param string $class - what class to wrap it in
 	 * @param boolean $add_init_code [optional] - if true, the classes default static init code will be added automatically
 	 * @return ViewableWrapper
