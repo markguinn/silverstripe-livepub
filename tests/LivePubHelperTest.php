@@ -10,267 +10,279 @@
 class LivePubHelperTest extends SapphireTest
 {
 
-	/**
-	 * tests that the is_publishing method is working correctly
-	 */
-	function testIsPublishing(){
-		$this->assertFalse( LivePubHelper::is_publishing() );
+    /**
+     * tests that the is_publishing method is working correctly
+     */
+    public function testIsPublishing()
+    {
+        $this->assertFalse(LivePubHelper::is_publishing());
 
-		LivePubHelper::init_pub();
-		$this->assertTrue( LivePubHelper::is_publishing() );
+        LivePubHelper::init_pub();
+        $this->assertTrue(LivePubHelper::is_publishing());
 
-		LivePubHelper::stop_pub();
-		$this->assertFalse( LivePubHelper::is_publishing() );
-	}
-
-
-	/**
-	 * tests the functionality related to the init code
-	 */
-	function testInitCode(){
-		LivePubHelper::$vars = array();
-		LivePubHelper::init_pub();
-
-		// after this is called, there should be one entry - the base_init_code
-		LivePubHelper::clear_init_code();
-		$this->assertEquals( count(LivePubHelper::$init_code), 1 );
-		$this->assertEquals( LivePubHelper::get_init_code(), LivePubHelper::$base_init_code."\n" );
-
-		// try a few things to make sure the php tags are added appropriately
-		LivePubHelper::$init_code = array('test');
-		$this->assertEquals( "<?php test ?>\n", LivePubHelper::get_init_code() );
-		LivePubHelper::$init_code = array('<?php test');
-		$this->assertEquals( "<?php test ?>\n", LivePubHelper::get_init_code() );
-		LivePubHelper::$init_code = array('test ?>');
-		$this->assertEquals( "<?php test ?>\n", LivePubHelper::get_init_code() );
-		LivePubHelper::$init_code = array('<?php test ?>');
-		$this->assertEquals( "<?php test ?>\n", LivePubHelper::get_init_code() );
-		LivePubHelper::$init_code = array();
-		$this->assertEquals( "", LivePubHelper::get_init_code() );
-
-		// test variables
-		LivePubHelper::$vars = array(
-			'a' => "'b'",
-			'b' => true,
-			'c' => "4",
-		);
-		$this->assertEquals( "\n<?php\n\$a = 'b';\n\$c = 4;\n\n?>\n", LivePubHelper::get_init_code() );
-
-		LivePubHelper::stop_pub();
-	}
+        LivePubHelper::stop_pub();
+        $this->assertFalse(LivePubHelper::is_publishing());
+    }
 
 
-	/**
-	 * checks eval_php
-	 */
-	function testEvalPhp(){
-		// when not publishing, should just return the value
-		$s = LivePubHelper::eval_php('return 5;');
-		$this->assertEquals( $s, 5 );
+    /**
+     * tests the functionality related to the init code
+     */
+    public function testInitCode()
+    {
+        LivePubHelper::$vars = array();
+        LivePubHelper::init_pub();
 
-		// when publishing should return code
-		LivePubHelper::init_pub();
+        // after this is called, there should be one entry - the base_init_code
+        LivePubHelper::clear_init_code();
+        $this->assertEquals(count(LivePubHelper::$init_code), 1);
+        $this->assertEquals(LivePubHelper::get_init_code(), LivePubHelper::$base_init_code."\n");
 
-		LivePubHelper::$context = 'php';
-		$s = LivePubHelper::eval_php('return 5;');
-		$this->assertEquals( $s, "eval('return 5;')" );
+        // try a few things to make sure the php tags are added appropriately
+        LivePubHelper::$init_code = array('test');
+        $this->assertEquals("<?php test ?>\n", LivePubHelper::get_init_code());
+        LivePubHelper::$init_code = array('<?php test');
+        $this->assertEquals("<?php test ?>\n", LivePubHelper::get_init_code());
+        LivePubHelper::$init_code = array('test ?>');
+        $this->assertEquals("<?php test ?>\n", LivePubHelper::get_init_code());
+        LivePubHelper::$init_code = array('<?php test ?>');
+        $this->assertEquals("<?php test ?>\n", LivePubHelper::get_init_code());
+        LivePubHelper::$init_code = array();
+        $this->assertEquals("", LivePubHelper::get_init_code());
 
-		LivePubHelper::$context = 'html';
-		$s = LivePubHelper::eval_php('return 5;');
-		$this->assertEquals( $s, "<?php echo eval('return 5;'); ?>" );
+        // test variables
+        LivePubHelper::$vars = array(
+            'a' => "'b'",
+            'b' => true,
+            'c' => "4",
+        );
+        $this->assertEquals("\n<?php\n\$a = 'b';\n\$c = 4;\n\n?>\n", LivePubHelper::get_init_code());
 
-		LivePubHelper::stop_pub();
-	}
-
-
-	/**
-	 * checks exec_php
-	 */
-	function testExecPhp(){
-		LivePubHelper::$init_code = array();
-
-		// not publishing
-		LivePubHelper::exec_php('$a = 5;');
-		$this->assertEquals( count(LivePubHelper::$init_code), 0 );
-
-		// publishing
-		LivePubHelper::init_pub();
-		LivePubHelper::exec_php('$a = 5;');
-		$this->assertEquals( count(LivePubHelper::$init_code), 1 );
-		LivePubHelper::stop_pub();
-	}
+        LivePubHelper::stop_pub();
+    }
 
 
-	function testIncludePhp(){
-		LivePubHelper::$template_path = array(dirname(__FILE__));
+    /**
+     * checks eval_php
+     */
+    public function testEvalPhp()
+    {
+        // when not publishing, should just return the value
+        $s = LivePubHelper::eval_php('return 5;');
+        $this->assertEquals($s, 5);
 
-		// not publishing
-		$str = LivePubHelper::include_php('TestPhpTemplate');
-		$this->assertEquals($str, 'Hello World');
+        // when publishing should return code
+        LivePubHelper::init_pub();
 
-		// publishing
-		LivePubHelper::init_pub();
-		$str = LivePubHelper::include_php('TestPhpTemplate');
-		$this->assertEquals($str, '<?php include "' . dirname(__FILE__) . '/TestPhpTemplate.php"; ?>');
-		LivePubHelper::stop_pub();
+        LivePubHelper::$context = 'php';
+        $s = LivePubHelper::eval_php('return 5;');
+        $this->assertEquals($s, "eval('return 5;')");
 
-		// check for exception on template not found
-		$wasThrown = false;
-		try {
-			LivePubHelper::include_php('ThisTemplateDoesntExist');
-		} catch (Exception $e) {
-			$wasThrown = true;
-		}
-		$this->assertTrue($wasThrown);
-	}
+        LivePubHelper::$context = 'html';
+        $s = LivePubHelper::eval_php('return 5;');
+        $this->assertEquals($s, "<?php echo eval('return 5;'); ?>");
 
-
-	/**
-	 * checks that ViewableWrapper works in normal mode
-	 */
-	function testWrapperUnpublished(){
-		if (LivePubHelper::is_publishing()) LivePubHelper::stop_pub();
-
-		// test an array
-		$o = $this->getArrayWrapper();
-		$this->assertEquals($o->a, 'b');
-		$this->assertEquals($o->b, 5);
-		$this->assertNotNull($o->c);
-		$this->assertTrue($o->c instanceof ViewableWrapper);
-		$this->assertEquals($o->c->e, 'f');
-		$this->assertNotNull($o->d);
-		$this->assertTrue($o->d instanceof ViewableWrapper);
-		$this->assertEquals($o->d->h, 'i');
-		$this->assertTrue($o->e instanceof ArrayList);
-		$this->assertEquals(
-			$this->getTestTemplate()->process($o),
-			'A=b, B=5, C.E=f, D.H=i, E=12'
-		);
-
-		// test an object
-		$o = $this->getObjectWrapper();
-		$this->assertEquals($o->a, 'b');
-		$this->assertEquals($o->b, 5);
-		$this->assertNotNull($o->c);
-		$this->assertTrue($o->c instanceof ViewableWrapper);
-		$this->assertEquals($o->c->e, 'f');
-		$this->assertNotNull($o->d);
-		$this->assertTrue($o->d instanceof ViewableWrapper);
-		$this->assertEquals($o->d->h, 'i');
-		$this->assertTrue($o->e instanceof ArrayList);
-		$this->assertEquals(
-			$this->getTestTemplate()->process($o),
-			'A=b, B=5, C.E=f, D.H=i, E=12'
-		);
-	}
+        LivePubHelper::stop_pub();
+    }
 
 
-	/**
-	 * checks that ViewableWrapper works in published mode
-	 */
-	function testWrapperPublished(){
-		LivePubHelper::init_pub();
+    /**
+     * checks exec_php
+     */
+    public function testExecPhp()
+    {
+        LivePubHelper::$init_code = array();
 
-		// test an array
-		$o = $this->getArrayWrapper();
-		$o->setVar('myvar');
-		$this->assertEquals($o->a, 'b');
-		$this->assertEquals($o->b, 5);
-		$this->assertNotNull($o->c);
-		$this->assertTrue($o->c instanceof ViewableWrapper);
-		$this->assertEquals($o->c->e, 'f');
-		$this->assertNotNull($o->d);
-		$this->assertTrue($o->d instanceof ViewableWrapper);
-		$this->assertEquals($o->d->h, 'i');
-		$this->assertTrue($o->e instanceof ArrayList);
-		$this->assertEquals(
-			$this->getTestTemplate()->process($o),
-			'A=<?php echo htmlentities($myvar["a"]); ?>, B=<?php echo htmlentities($myvar["b"]); ?>, C.E=<?php echo htmlentities($myvar_c["e"]); ?>, D.H=<?php echo htmlentities($myvar_d["h"]); ?>, E=12'
-		);
+        // not publishing
+        LivePubHelper::exec_php('$a = 5;');
+        $this->assertEquals(count(LivePubHelper::$init_code), 0);
 
-		// test an object
-		$o = $this->getObjectWrapper();
-		$o->setVar('myvar');
-		$this->assertEquals($o->a, 'b');
-		$this->assertEquals($o->b, 5);
-		$this->assertNotNull($o->c);
-		$this->assertTrue($o->c instanceof ViewableWrapper);
-		$this->assertEquals($o->c->e, 'f');
-		$this->assertNotNull($o->d);
-		$this->assertTrue($o->d instanceof ViewableWrapper);
-		$this->assertEquals($o->d->h, 'i');
-		$this->assertTrue($o->e instanceof ArrayList);
-		$this->assertEquals(
-			$this->getTestTemplate()->process($o),
-			'A=<?php echo htmlentities($myvar->a); ?>, B=<?php echo htmlentities($myvar->b); ?>, C.E=<?php echo htmlentities($myvar_c["e"]); ?>, D.H=<?php echo htmlentities($myvar_d->h); ?>, E=12'
-		);
-
-		// test an object with different features
-		$o = $this->getObjectWrapper();
-		$o->setVar('myvar');
-		$o->setLiveVars(array('a','b'));
-		$o->setUnescapedVars(array('a'));
-		$this->assertEquals(
-			$this->getTestTemplate()->process($o),
-			'A=<?php echo $myvar->a; ?>, B=<?php echo htmlentities($myvar->b); ?>, C.E=f, D.H=i, E=12'
-		);
-
-		LivePubHelper::stop_pub();
-	}
+        // publishing
+        LivePubHelper::init_pub();
+        LivePubHelper::exec_php('$a = 5;');
+        $this->assertEquals(count(LivePubHelper::$init_code), 1);
+        LivePubHelper::stop_pub();
+    }
 
 
-	/**
-	 * check silverstripe db stub
-	 */
-	function testRequireSilverstripeDB(){
-		LivePubHelper::$init_code = array();
+    public function testIncludePhp()
+    {
+        LivePubHelper::$template_path = array(dirname(__FILE__));
 
-		// check that nothing happens when not publishing
-		LivePubHelper::require_silverstripe_db();
-		$this->assertEquals(count(LivePubHelper::$init_code), 0);
+        // not publishing
+        $str = LivePubHelper::include_php('TestPhpTemplate');
+        $this->assertEquals($str, 'Hello World');
 
-		// check that it does happen when publishing
-		LivePubHelper::init_pub();
-		LivePubHelper::require_silverstripe_db();
-		$this->assertEquals(count(LivePubHelper::$init_code), 1);
-		$this->assertEquals(preg_match('/\$databaseConfig = array \(.+\);/ms', LivePubHelper::$init_code[0]), 1);
+        // publishing
+        LivePubHelper::init_pub();
+        $str = LivePubHelper::include_php('TestPhpTemplate');
+        $this->assertEquals($str, '<?php include "' . dirname(__FILE__) . '/TestPhpTemplate.php"; ?>');
+        LivePubHelper::stop_pub();
 
-		// check that it's not included twice
-		LivePubHelper::require_silverstripe_db();
-		$this->assertEquals(count(LivePubHelper::$init_code), 1);
-
-		LivePubHelper::stop_pub();
-	}
-
-
-	protected function getArrayWrapper(){
-		$o2 = new stdClass();
-		$o2->h = 'i';
-		return LivePubHelper::wrap(array(
-			'a' => 'b',
-			'b' => 5,
-			'c' => array('e'=>'f'),
-			'd' => $o2,
-			'e' => array(array('a'=>1),array('a'=>2)),
-		));
-	}
+        // check for exception on template not found
+        $wasThrown = false;
+        try {
+            LivePubHelper::include_php('ThisTemplateDoesntExist');
+        } catch (Exception $e) {
+            $wasThrown = true;
+        }
+        $this->assertTrue($wasThrown);
+    }
 
 
-	protected function getObjectWrapper(){
-		$o = new stdClass();
-		$o->a = 'b';
-		$o->b = 5;
-		$o->c = array('e'=>'f');
-		$o2 = new stdClass();
-		$o2->h = 'i';
-		$o->d = $o2;
-		$o->e = array(array('a'=>1),array('a'=>2));
-		return LivePubHelper::wrap($o);
-	}
+    /**
+     * checks that ViewableWrapper works in normal mode
+     */
+    public function testWrapperUnpublished()
+    {
+        if (LivePubHelper::is_publishing()) {
+            LivePubHelper::stop_pub();
+        }
+
+        // test an array
+        $o = $this->getArrayWrapper();
+        $this->assertEquals($o->a, 'b');
+        $this->assertEquals($o->b, 5);
+        $this->assertNotNull($o->c);
+        $this->assertTrue($o->c instanceof ViewableWrapper);
+        $this->assertEquals($o->c->e, 'f');
+        $this->assertNotNull($o->d);
+        $this->assertTrue($o->d instanceof ViewableWrapper);
+        $this->assertEquals($o->d->h, 'i');
+        $this->assertTrue($o->e instanceof ArrayList);
+        $this->assertEquals(
+            $this->getTestTemplate()->process($o),
+            'A=b, B=5, C.E=f, D.H=i, E=12'
+        );
+
+        // test an object
+        $o = $this->getObjectWrapper();
+        $this->assertEquals($o->a, 'b');
+        $this->assertEquals($o->b, 5);
+        $this->assertNotNull($o->c);
+        $this->assertTrue($o->c instanceof ViewableWrapper);
+        $this->assertEquals($o->c->e, 'f');
+        $this->assertNotNull($o->d);
+        $this->assertTrue($o->d instanceof ViewableWrapper);
+        $this->assertEquals($o->d->h, 'i');
+        $this->assertTrue($o->e instanceof ArrayList);
+        $this->assertEquals(
+            $this->getTestTemplate()->process($o),
+            'A=b, B=5, C.E=f, D.H=i, E=12'
+        );
+    }
 
 
-	protected function getTestTemplate(){
-		return SSViewer::fromString('A=$a, B=$b, C.E=$c.e, D.H=$d.h, E=<% loop e %>$a<% end_loop %>');
-	}
+    /**
+     * checks that ViewableWrapper works in published mode
+     */
+    public function testWrapperPublished()
+    {
+        LivePubHelper::init_pub();
 
+        // test an array
+        $o = $this->getArrayWrapper();
+        $o->setVar('myvar');
+        $this->assertEquals($o->a, 'b');
+        $this->assertEquals($o->b, 5);
+        $this->assertNotNull($o->c);
+        $this->assertTrue($o->c instanceof ViewableWrapper);
+        $this->assertEquals($o->c->e, 'f');
+        $this->assertNotNull($o->d);
+        $this->assertTrue($o->d instanceof ViewableWrapper);
+        $this->assertEquals($o->d->h, 'i');
+        $this->assertTrue($o->e instanceof ArrayList);
+        $this->assertEquals(
+            $this->getTestTemplate()->process($o),
+            'A=<?php echo htmlentities($myvar["a"]); ?>, B=<?php echo htmlentities($myvar["b"]); ?>, C.E=<?php echo htmlentities($myvar_c["e"]); ?>, D.H=<?php echo htmlentities($myvar_d["h"]); ?>, E=12'
+        );
+
+        // test an object
+        $o = $this->getObjectWrapper();
+        $o->setVar('myvar');
+        $this->assertEquals($o->a, 'b');
+        $this->assertEquals($o->b, 5);
+        $this->assertNotNull($o->c);
+        $this->assertTrue($o->c instanceof ViewableWrapper);
+        $this->assertEquals($o->c->e, 'f');
+        $this->assertNotNull($o->d);
+        $this->assertTrue($o->d instanceof ViewableWrapper);
+        $this->assertEquals($o->d->h, 'i');
+        $this->assertTrue($o->e instanceof ArrayList);
+        $this->assertEquals(
+            $this->getTestTemplate()->process($o),
+            'A=<?php echo htmlentities($myvar->a); ?>, B=<?php echo htmlentities($myvar->b); ?>, C.E=<?php echo htmlentities($myvar_c["e"]); ?>, D.H=<?php echo htmlentities($myvar_d->h); ?>, E=12'
+        );
+
+        // test an object with different features
+        $o = $this->getObjectWrapper();
+        $o->setVar('myvar');
+        $o->setLiveVars(array('a', 'b'));
+        $o->setUnescapedVars(array('a'));
+        $this->assertEquals(
+            $this->getTestTemplate()->process($o),
+            'A=<?php echo $myvar->a; ?>, B=<?php echo htmlentities($myvar->b); ?>, C.E=f, D.H=i, E=12'
+        );
+
+        LivePubHelper::stop_pub();
+    }
+
+
+    /**
+     * check silverstripe db stub
+     */
+    public function testRequireSilverstripeDB()
+    {
+        LivePubHelper::$init_code = array();
+
+        // check that nothing happens when not publishing
+        LivePubHelper::require_silverstripe_db();
+        $this->assertEquals(count(LivePubHelper::$init_code), 0);
+
+        // check that it does happen when publishing
+        LivePubHelper::init_pub();
+        LivePubHelper::require_silverstripe_db();
+        $this->assertEquals(count(LivePubHelper::$init_code), 1);
+        $this->assertEquals(preg_match('/\$databaseConfig = array \(.+\);/ms', LivePubHelper::$init_code[0]), 1);
+
+        // check that it's not included twice
+        LivePubHelper::require_silverstripe_db();
+        $this->assertEquals(count(LivePubHelper::$init_code), 1);
+
+        LivePubHelper::stop_pub();
+    }
+
+
+    protected function getArrayWrapper()
+    {
+        $o2 = new stdClass();
+        $o2->h = 'i';
+        return LivePubHelper::wrap(array(
+            'a' => 'b',
+            'b' => 5,
+            'c' => array('e'=>'f'),
+            'd' => $o2,
+            'e' => array(array('a'=>1), array('a'=>2)),
+        ));
+    }
+
+
+    protected function getObjectWrapper()
+    {
+        $o = new stdClass();
+        $o->a = 'b';
+        $o->b = 5;
+        $o->c = array('e'=>'f');
+        $o2 = new stdClass();
+        $o2->h = 'i';
+        $o->d = $o2;
+        $o->e = array(array('a'=>1),array('a'=>2));
+        return LivePubHelper::wrap($o);
+    }
+
+
+    protected function getTestTemplate()
+    {
+        return SSViewer::fromString('A=$a, B=$b, C.E=$c.e, D.H=$d.h, E=<% loop e %>$a<% end_loop %>');
+    }
 }
