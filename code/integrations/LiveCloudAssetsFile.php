@@ -12,13 +12,14 @@
  */
 class LiveCloudAssetsFile extends DataExtension
 {
-	public function LiveLink() {
-		if ($this->owner->hasField('CloudStatus') && $this->owner->CloudStatus === 'Live') {
-			$http  = $this->owner->getCloudURL(CloudBucket::LINK_HTTP);
-			$https = $this->owner->getCloudURL(CloudBucket::LINK_HTTPS);
-			return LivePubHelper::eval_php('return empty($_SERVER["HTTPS"]) ? "' . $http . '" : "' . $https . '";');
-		} else {
-			return $this->owner->Link();
-		}
-	}
+    public function LiveLink()
+    {
+        if ($this->owner->hasField('CloudStatus') && $this->owner->CloudStatus === 'Live') {
+            $http  = $this->owner->getCloudURL(CloudBucket::LINK_HTTP);
+            $https = $this->owner->getCloudURL(CloudBucket::LINK_HTTPS);
+            return LivePubHelper::eval_php('return empty($_SERVER["HTTPS"]) ? "' . $http . '" : "' . $https . '";');
+        } else {
+            return $this->owner->Link();
+        }
+    }
 }
